@@ -32,8 +32,8 @@ function MeetingView({ user }) {
       
       // Convert evaluations array to object
       const evaluationsObj = {}
-      evaluationsData.forEach(eval => {
-        evaluationsObj[eval.culture_item_id] = eval.is_implemented
+      evaluationsData.forEach(evaluation => {
+        evaluationsObj[evaluation.culture_item_id] = evaluation.is_implemented
       })
       setEvaluations(evaluationsObj)
     } catch (error) {
