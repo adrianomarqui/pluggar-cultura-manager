@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { db } from '../lib/supabase'
-import { ArrowLeft, Save, RotateCcw, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Save, RotateCcw, MessageSquare, CheckCircle } from 'lucide-react'
 import { cultureSections } from '../data/cultureData'
 import ChecklistSection from './ChecklistSection'
 import ObservationsSection from './ObservationsSection'
@@ -15,6 +15,7 @@ function MeetingView({ user }) {
   const [observations, setObservations] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [finishing, setFinishing] = useState(false)
 
   useEffect(() => {
     loadMeetingData()
@@ -110,6 +111,28 @@ function MeetingView({ user }) {
     }
   }
 
+  const handleFinishEvaluation = async () => {
+    setFinishing(true)
+    try {
+      // Salvar observações se houver alterações pendentes
+      await db.updateMeeting(id, {
+        observations: observations,
+        updated_at: new Date().toISOString()
+      })
+
+      // Mostrar mensagem de sucesso
+      alert('Avaliação finalizada com sucesso!')
+      
+      // Redirecionar para o dashboard
+      navigate('/')
+    } catch (error) {
+      console.error('Erro ao finalizar avaliação:', error)
+      alert('Erro ao finalizar avaliação. Tente novamente.')
+    } finally {
+      setFinishing(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -201,6 +224,21 @@ function MeetingView({ user }) {
           implementationRate={implementationRate}
           culturalScore={meeting.cultural_score || 0}
         />
+
+        {/* Finish Evaluation Button */}
+        <div className="mt-12 flex justify-center">
+          <button
+            onClick={handleFinishEvaluation}
+            disabled={finishing}
+            className="btn btn-primary px-8 py-4 text-lg font-semibold flex items-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            <CheckCircle className="h-6 w-6 mr-3" />
+            {finishing ? 'Finalizando...' : 'Finalizar Avaliação'}
+          </button>
+        </div>
+
+        {/* Bottom Spacing */}
+        <div className="h-16"></div>
       </main>
     </div>
   )
